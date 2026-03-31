@@ -1,0 +1,21 @@
+name: nfc_reader
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.8
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  intl: ^0.20.2           # Untuk format tanggal dan waktu
+  nfc_manager: ^3.5.0     # Library utama untuk membaca NFC
+
+flutter:
+  uses-material-design: true
