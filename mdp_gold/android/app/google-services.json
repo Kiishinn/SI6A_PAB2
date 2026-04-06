@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "614865934348",
+    "firebase_url": "https://mdpgold-e722a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "mdpgold-e722a",
+    "storage_bucket": "mdpgold-e722a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:614865934348:android:eed8805c0d40f20d023629",
+        "android_client_info": {
+          "package_name": "com.example.mdp_gold"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEXGrUpY2BeEYKgO4uUeilNOqUIozGn2I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
