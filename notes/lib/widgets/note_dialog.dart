@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/note.dart';
 import '../services/note_service.dart';
+import '../services/fcm_service.dart';
 
 class NoteDialog extends StatefulWidget {
   final Note? note; // null = tambah, ada isi = edit
@@ -18,6 +19,7 @@ class _NoteDialogState extends State<NoteDialog> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final NoteService _noteService = NoteService();
+  final FcmService _fcmService = FcmService();
   final ImagePicker _picker = ImagePicker();
 
   String? _imageBase64;
@@ -86,6 +88,12 @@ class _NoteDialogState extends State<NoteDialog> {
         // Mode edit
         await _noteService.updateNote(widget.note!.id!, note);
       }
+
+      // Send FCM notification after successful save
+      await _fcmService.sendNoteNotification(
+        title: note.title,
+        description: note.description,
+      );
 
       if (mounted) Navigator.of(context).pop();
     } catch (e) {

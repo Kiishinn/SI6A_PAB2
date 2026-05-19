@@ -1,12 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:intl/intl.dart';
 import '../models/note.dart';
 import '../services/note_service.dart';
+import '../services/fcm_service.dart';
 import '../widgets/note_dialog.dart';
+import 'subscribe_screen.dart';
 
 class NoteListScreen extends StatelessWidget {
   final NoteService _noteService = NoteService();
+  final FcmService _fcmService = FcmService();
 
   NoteListScreen({super.key});
 
@@ -57,6 +62,39 @@ class NoteListScreen extends StatelessWidget {
     );
   }
 
+  // Copy FCM Token to clipboard
+  Future<void> _copyFcmToken(BuildContext context) async {
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        await Clipboard.setData(ClipboardData(text: token));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('FCM Token berhasil disalin ke clipboard'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        debugPrint('FCM Token: $token');
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Gagal mendapatkan FCM Token'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,6 +107,25 @@ class NoteListScreen extends StatelessWidget {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         elevation: 2,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SubscribeScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.subscriptions),
+            tooltip: 'Subscribe Topics',
+          ),
+          IconButton(
+            onPressed: () => _copyFcmToken(context),
+            icon: const Icon(Icons.copy),
+            tooltip: 'Copy FCM Token',
+          ),
+        ],
       ),
       // Floating Action Button untuk tambah note
       floatingActionButton: FloatingActionButton(
