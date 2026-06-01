@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../models/note.dart';
 import '../services/note_service.dart';
 import '../services/fcm_service.dart';
+import '../l10n/app_localizations.dart';
 
 class NoteDialog extends StatefulWidget {
   final Note? note; // null = tambah, ada isi = edit
@@ -61,8 +62,9 @@ class _NoteDialogState extends State<NoteDialog> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memilih gambar: $e')),
+          SnackBar(content: Text(l10n.pickImageFailed(e.toString()))),
         );
       }
     }
@@ -98,8 +100,15 @@ class _NoteDialogState extends State<NoteDialog> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan: $e')),
+          SnackBar(
+            content: Text(
+              widget.note == null 
+                ? l10n.noteAddFailed(e.toString())
+                : l10n.noteUpdateFailed(e.toString())
+            )
+          ),
         );
       }
     } finally {
@@ -109,6 +118,7 @@ class _NoteDialogState extends State<NoteDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isEdit = widget.note != null;
 
     return Dialog(
@@ -124,7 +134,7 @@ class _NoteDialogState extends State<NoteDialog> {
               children: [
                 // Header
                 Text(
-                  isEdit ? 'Edit Note' : 'Tambah Note',
+                  isEdit ? l10n.editNote : l10n.addNote,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -136,8 +146,7 @@ class _NoteDialogState extends State<NoteDialog> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'Title',
-                    hintText: 'Masukkan judul note',
+                    labelText: l10n.titleLabel,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -145,7 +154,7 @@ class _NoteDialogState extends State<NoteDialog> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Title tidak boleh kosong';
+                      return l10n.titleEmpty;
                     }
                     return null;
                   },
@@ -157,8 +166,7 @@ class _NoteDialogState extends State<NoteDialog> {
                   controller: _descriptionController,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Masukkan deskripsi note',
+                    labelText: l10n.descriptionLabel,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -167,7 +175,7 @@ class _NoteDialogState extends State<NoteDialog> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Description tidak boleh kosong';
+                      return l10n.descriptionEmpty;
                     }
                     return null;
                   },
@@ -193,15 +201,15 @@ class _NoteDialogState extends State<NoteDialog> {
                               width: double.infinity,
                             ),
                           )
-                        : const Column(
+                        : Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.add_photo_alternate,
+                              const Icon(Icons.add_photo_alternate,
                                   size: 48, color: Colors.grey),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
-                                'Tap untuk pilih gambar',
-                                style: TextStyle(color: Colors.grey),
+                                l10n.tapToAddImage,
+                                style: const TextStyle(color: Colors.grey),
                               ),
                             ],
                           ),
@@ -213,8 +221,8 @@ class _NoteDialogState extends State<NoteDialog> {
                   TextButton.icon(
                     onPressed: () => setState(() => _imageBase64 = null),
                     icon: const Icon(Icons.delete, color: Colors.red),
-                    label: const Text('Hapus Gambar',
-                        style: TextStyle(color: Colors.red)),
+                    label: Text(l10n.delete,
+                        style: const TextStyle(color: Colors.red)),
                   ),
 
                 const SizedBox(height: 16),
@@ -226,7 +234,7 @@ class _NoteDialogState extends State<NoteDialog> {
                     TextButton(
                       onPressed:
                           _isLoading ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Batal'),
+                      child: Text(l10n.cancel),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
@@ -247,7 +255,7 @@ class _NoteDialogState extends State<NoteDialog> {
                                 color: Colors.white,
                               ),
                             )
-                          : Text(isEdit ? 'Update' : 'Simpan'),
+                          : Text(isEdit ? l10n.save : l10n.add),
                     ),
                   ],
                 ),

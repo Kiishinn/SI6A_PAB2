@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/fcm_service.dart';
+import '../l10n/app_localizations.dart';
 
 class SubscribeScreen extends StatefulWidget {
   const SubscribeScreen({super.key});
@@ -86,9 +87,10 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
         });
         await _saveTopic();
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Berhasil subscribe ke topic "$topic"'),
+              content: Text(l10n.subscribedToTopic(topic)),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
             ),
@@ -96,9 +98,10 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
         }
       } else {
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Gagal subscribe ke topic "$topic"'),
+              content: Text(l10n.errorOccurred),
               backgroundColor: Colors.red,
             ),
           );
@@ -119,9 +122,10 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
         });
         await _saveTopic();
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Berhasil unsubscribe dari topic "$topic"'),
+              content: Text(l10n.unsubscribedFromTopic(topic)),
               backgroundColor: Colors.orange,
               duration: const Duration(seconds: 2),
             ),
@@ -151,9 +155,10 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
 
     // Check if already exists
     if (_suggestedTopics.contains(topic) || _customTopics.contains(topic)) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Topic "$topic" sudah ada'),
+          content: Text(l10n.alreadySubscribed(topic)),
           backgroundColor: Colors.orange,
         ),
       );
@@ -183,11 +188,12 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Subscribe Topics',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.subscribeScreenTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.blue,
@@ -226,9 +232,9 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
             const SizedBox(height: 20),
 
             // Input custom topic
-            const Text(
-              'Tambah Topic Custom',
-              style: TextStyle(
+            Text(
+              l10n.customTopicTitle,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -240,7 +246,7 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
                   child: TextField(
                     controller: _topicController,
                     decoration: InputDecoration(
-                      hintText: 'Masukkan nama topic...',
+                      hintText: l10n.customTopicHint,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -256,7 +262,7 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
                 ElevatedButton.icon(
                   onPressed: _addCustomTopic,
                   icon: const Icon(Icons.add),
-                  label: const Text('Subscribe'),
+                  label: Text(l10n.subscribe),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
@@ -274,9 +280,9 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
             const SizedBox(height: 24),
 
             // Suggested Topics
-            const Text(
-              'Suggested Topics',
-              style: TextStyle(
+            Text(
+              l10n.suggestedTopics,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),

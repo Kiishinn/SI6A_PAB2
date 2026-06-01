@@ -8,6 +8,8 @@ import '../services/note_service.dart';
 import '../services/fcm_service.dart';
 import '../widgets/note_dialog.dart';
 import 'subscribe_screen.dart';
+import '../l10n/app_localizations.dart';
+import '../main.dart';
 
 class NoteListScreen extends StatelessWidget {
   final NoteService _noteService = NoteService();
@@ -32,47 +34,52 @@ class NoteListScreen extends StatelessWidget {
   }
 
   // Konfirmasi dan hapus note
-  void _deleteNote(BuildContext context, String id) {
+  void _deleteNote(BuildContext context, Note note) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hapus Note'),
-        content: const Text('Apakah Anda yakin ingin menghapus note ini?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _noteService.deleteNote(id);
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Note berhasil dihapus')),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder: (context) {
+        final dialogL10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(dialogL10n.deleteNote),
+          content: Text(dialogL10n.deleteConfirm(note.title)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(dialogL10n.cancel),
             ),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
+            ElevatedButton(
+              onPressed: () {
+                _noteService.deleteNote(note.id!);
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.noteDeleted)),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(dialogL10n.delete),
+            ),
+          ],
+        );
+      },
     );
   }
 
   // Copy FCM Token to clipboard
   Future<void> _copyFcmToken(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
         await Clipboard.setData(ClipboardData(text: token));
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('FCM Token berhasil disalin ke clipboard'),
-              duration: Duration(seconds: 2),
+            SnackBar(
+              content: Text(l10n.fcmTokenCopied),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -80,8 +87,8 @@ class NoteListScreen extends StatelessWidget {
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Gagal mendapatkan FCM Token'),
+            SnackBar(
+              content: Text(l10n.errorOccurred),
             ),
           );
         }
@@ -89,7 +96,7 @@ class NoteListScreen extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(l10n.errorOccurred + ': $e')),
         );
       }
     }
@@ -97,17 +104,53 @@ class NoteListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final currentLocale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'id';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'My Notes',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.appTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         elevation: 2,
         actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.language),
+            tooltip: l10n.language,
+            onSelected: (code) => MainApp.setLocale(Locale(code)),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'id',
+                child: Row(
+                  children: [
+                    if (currentLocale == 'id')
+                      const Icon(Icons.check, size: 18, color: Colors.blue)
+                    else
+                      const SizedBox(width: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.languageIndonesian),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'en',
+                child: Row(
+                  children: [
+                    if (currentLocale == 'en')
+                      const Icon(Icons.check, size: 18, color: Colors.blue)
+                    else
+                      const SizedBox(width: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.languageEnglish),
+                  ],
+                ),
+              ),
+            ],
+          ),
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -118,12 +161,12 @@ class NoteListScreen extends StatelessWidget {
               );
             },
             icon: const Icon(Icons.subscriptions),
-            tooltip: 'Subscribe Topics',
+            tooltip: l10n.subscribeTooltip,
           ),
           IconButton(
             onPressed: () => _copyFcmToken(context),
             icon: const Icon(Icons.copy),
-            tooltip: 'Copy FCM Token',
+            tooltip: l10n.copyFcmToken,
           ),
         ],
       ),
@@ -150,7 +193,7 @@ class NoteListScreen extends StatelessWidget {
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
                   Text(
-                    'Error: ${snapshot.error}',
+                    '${l10n.errorOccurred}: ${snapshot.error}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.red),
                   ),
@@ -163,20 +206,20 @@ class NoteListScreen extends StatelessWidget {
 
           // Empty state
           if (notes.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.note_add, size: 80, color: Colors.grey),
-                  SizedBox(height: 16),
+                  const Icon(Icons.note_add, size: 80, color: Colors.grey),
+                  const SizedBox(height: 16),
                   Text(
-                    'Belum ada notes',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    l10n.noNotes,
+                    style: const TextStyle(fontSize: 18, color: Colors.grey),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Tap tombol + untuk menambahkan note baru',
-                    style: TextStyle(color: Colors.grey),
+                    l10n.addNoteHint,
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
@@ -265,14 +308,14 @@ class NoteListScreen extends StatelessWidget {
                                     _showEditDialog(context, note),
                                 icon: const Icon(Icons.edit,
                                     color: Colors.blue),
-                                tooltip: 'Edit',
+                                tooltip: l10n.editNote,
                               ),
                               IconButton(
                                 onPressed: () =>
-                                    _deleteNote(context, note.id!),
+                                    _deleteNote(context, note),
                                 icon: const Icon(Icons.delete,
                                     color: Colors.red),
-                                tooltip: 'Hapus',
+                                tooltip: l10n.delete,
                               ),
                             ],
                           ),
